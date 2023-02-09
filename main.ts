@@ -1,2 +1,2 @@
 "use strict";
-// まだ何もないよ!
+export * from './union_find/main.ts';
