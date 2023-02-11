@@ -77,7 +77,3 @@ export class SegmentTree<T> extends Array<T> {
     return retVal;
   }
 }
-
-const e = new SegmentTree<number>(Math.min,Infinity);
-e.push(1,2,3,4,5);
-console.log(e.concat(1,2,3).constructor);
