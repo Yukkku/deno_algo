@@ -76,7 +76,12 @@ const SegTree = <T>(op: (a: T, b: T) => T, e: T): SegTreeConstructor<T> => {
         },
       });
     }
-  
+
+    /**
+     * モノイドだと信じて[bigin, end)の範囲で計算
+     * @param bigin 区間の左端(含む)
+     * @param end 区間の右端(含まない)
+     */
     prod(bigin: number, end: number) {
       if (bigin < 0) {
         bigin = 0;
@@ -112,21 +117,33 @@ const SegTree = <T>(op: (a: T, b: T) => T, e: T): SegTreeConstructor<T> => {
   return SegTree;
 }
 
+/**
+ * 範囲の和を計算するセグ木
+ */
 SegTree.sum = SegTree<number>(
   (a: number, b: number) => a + b,
   0,
 );
 
+/**
+ * 範囲の最小値を計算するセグ木
+ */
 SegTree.min = SegTree<number>(
   Math.min,
   Infinity,
 );
 
+/**
+ * 範囲の最大値を計算するセグ木
+ */
 SegTree.max = SegTree<number>(
   Math.max,
   -Infinity,
 );
 
+/**
+ * 範囲のビット排他的論理和を計算するセグ木
+ */
 SegTree.xor = SegTree<number>(
   (a: number, b: number) => a ^ b,
   0,
