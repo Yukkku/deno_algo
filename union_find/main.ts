@@ -1,20 +1,20 @@
 "use strict";
 
 /**
- * UnionFindの実装です。集合を合体できるやつです。詳細はググってください。
+ * Union Findの実装
  */
 export class UnionFind {
   /** 木の親の要素。根の場合は-(木の大きさ)になる */
-  private parent: number[];
+  #parent: number[];
   /** 経路圧縮しなかった場合の木の高さ */
-  private height: number[];
+  #height: number[];
 
   /**
    * @param n 要素数の上限
    */
   constructor (n: number) {
-    this.parent = [...Array(n)].fill(-1);
-    this.height = [...Array(n)].fill(1);
+    this.#parent = [...Array(n)].fill(-1);
+    this.#height = [...Array(n)].fill(1);
   }
 
   /**
@@ -23,14 +23,14 @@ export class UnionFind {
    * @returns 根の番号
    */
   root (a: number): number {
-    const parent = this.parent[a];
+    const parent = this.#parent[a];
 
     if (parent < 0) {
       return a;
     }
 
     const root = this.root(parent);
-    this.parent[a] = root;
+    this.#parent[a] = root;
     return root;
   }
 
@@ -48,16 +48,16 @@ export class UnionFind {
       return aRoot;
     }
 
-    if (this.height[aRoot] > this.height[bRoot]) {
-      this.parent[bRoot] += this.parent[aRoot];
-      this.parent[aRoot] = bRoot;
+    if (this.#height[aRoot] > this.#height[bRoot]) {
+      this.#parent[bRoot] += this.#parent[aRoot];
+      this.#parent[aRoot] = bRoot;
       return bRoot;
     } else {
-      this.parent[aRoot] += this.parent[bRoot];
-      this.parent[bRoot] = aRoot;
+      this.#parent[aRoot] += this.#parent[bRoot];
+      this.#parent[bRoot] = aRoot;
 
-      if (this.height[aRoot] === this.height[bRoot]) {
-        this.height[aRoot] += 1;
+      if (this.#height[aRoot] === this.#height[bRoot]) {
+        this.#height[aRoot] += 1;
       }
       return aRoot;
     }
@@ -69,7 +69,7 @@ export class UnionFind {
    * @returns グループのサイズ
    */
   size (a: number): number {
-    return -this.parent[this.root(a)];
+    return -this.#parent[this.root(a)];
   }
 
   /**

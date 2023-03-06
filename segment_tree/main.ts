@@ -1,152 +1,113 @@
 "use strict";
 
-interface SegTreeConstructor<T> extends ArrayConstructor {
-  new (...i: T[] | [number]): SegTree<T>;
-  prototype: SegTree<T>;
-  op: (a: T, b: T) => T;
-  e: T;
-}
-
-interface SegTree<T> extends Array<T> {
-  constructor: SegTreeConstructor<T>;
-  roots?: SegTree<T>;
-  prod (a: number, b: number): T
-}
-
 /**
- * セグ木のクラスを作る関数です。
- * @param op モノイドの演算
- * @param e モノイドの単位元
+ * Segment Treeの実装
  */
-const SegTree = <T>(op: (a: T, b: T) => T, e: T): SegTreeConstructor<T> => {
-  const SegTree = (class extends Array<T> {
-    static op = op;
-    static e = e;
+export class SegmentTree<T> {
+  #e: T;
+  #op: (a: T, b: T) => T;
+  #data: T[];
 
-    roots?: SegTree<T>;
-  
-    constructor () {
-      super(...arguments);
+  /**
+   * SegmentTreeは`e`で初期化される
+   * @param e モノイドの単位元
+   * @param op モノイドの演算
+   * @param length SegmentTreeの要素数
+   */
+  constructor (e: T, op: (a: T, b: T) => T, length: number);
 
-      if (this.length >= 2) {
-        this.roots = new SegTree();
+  /**
+   * @param e モノイドの単位元
+   * @param op モノイドの演算
+   * @param array SegmentTreeの初期値
+   */
+  constructor (e: T, op: (a: T, b: T) => T, array: T[]);
 
-        for (let i = 1; i < this.length; i += 2) {
-          this.roots.push(op(this[i - 1], this[i]));
-        }
+  constructor (e: T, op: (a: T, b: T) => T, input: number | T[]) {
+    this.#e = e;
+    this.#op = op;
+
+    if (typeof input === 'number') {
+      let length = 1;
+
+      while (length * 2 < input) {
+        length *= 2;
       }
 
-      return new Proxy(this, {
-        get (target, p) {
-          if (typeof p === 'string' && !Number.isNaN(Number(p))) {
-            if (!Object.hasOwn(target, p)) {
-              return e;
-            }
-          }
-  
-          return target[p as keyof SegTree<T>];
-        },
-  
-        set (target, p, val) {
-          target[p as keyof SegTree<T>] = val;
+      this.#data = [];
 
-          if (typeof p === 'string' && !Number.isNaN(Number(p))) {
-            const index = Number(p);
-        
-            if (target.length > 1) {
-              if (target.roots === undefined) {
-                target.roots = new SegTree();
-              }
-        
-              const rootIndex = index >> 1;
-        
-              if ((index & 1) === 1 || index + 1 !== target.length) {
-                target.roots[rootIndex] = SegTree.op(target[rootIndex << 1], target[(rootIndex << 1) + 1]);
-              }
-            }
-          } else {
-            if (p === 'length') {
-              if (target.roots !== undefined) {
-                target.roots.length = Number(val) >> 1;
-              }
-            }
-          }
-  
-          return true;
-        },
-      });
+      for (let i = 0; i < length; i += 1) {
+        this.#data.push(e);
+      }
+
+      return;
     }
 
-    /**
-     * モノイドだと信じて[bigin, end)の範囲で計算
-     * @param bigin 区間の左端(含む)
-     * @param end 区間の右端(含まない)
-     */
-    prod(bigin: number, end: number) {
-      if (bigin < 0) {
-        bigin = 0;
-      }
+    let size = 1;
 
-      if (end > this.length) {
-        end = this.length;
-      }
+    while (size < input.length) {
+      size *= 2;
+    }
 
-      let retVal = SegTree.e;
-  
-      if (bigin >= end) {
-        return retVal;
-      }
-  
+    const notReaf: T[] = [];
+
+    for (let i = 0; i < size; i += 1) {
+      notReaf.push(e);
+    }
+
+    this.#data = notReaf.concat(input);
+
+    for (let i = input.length; i < size; i += 1) {
+      notReaf.push(e);
+    }
+
+    for (let i = size - 1; i > 0; i -= 1) {
+      this.#data[i] = op(this.#data[i * 2], this.#data[i * 2 + 1]);
+    }
+  }
+
+  /**
+   * 要素の更新を行う
+   * @param index 更新する要素のindex
+   * @param value 更新後の値
+   */
+  set (index: number, value: T) {
+    const i = index + this.#data.length / 2;
+    this.#data[i] = value;
+
+    while (i > 1) {
+      i >>> 1;
+      this.#data[i] = this.#op(this.#data[i * 2], this.#data[i * 2 + 1]);
+    }
+  }
+
+  /**
+   * 区間積を計算する
+   * @param bigin 区間の開始位置(含む)
+   * @param end 区間の終了位置(含まない)
+   * @returns `[bigin, end)`の総積
+   */
+  query (bigin: number, end: number) {
+    const size = this.#data.length / 2;
+    let left = this.#e;
+    let right = this.#e;
+
+    bigin += size;
+    end += size;
+
+    while (bigin < end) {
       if (bigin & 1) {
-        retVal = this[bigin];
+        left = this.#op(left, this.#data[bigin]);
         bigin += 1;
       }
-  
-      if (this.roots !== undefined) {
-        retVal = SegTree.op(retVal, this.roots.prod(bigin >> 1, end >> 1));
-      }
-  
       if (end & 1) {
-        retVal = SegTree.op(retVal, this[end - 1]);
+        end -= 1;
+        right = this.#op(this.#data[end], right);
       }
-  
-      return retVal;
+      bigin >>>= 1;
+      end >>>= 1;
     }
-  }) as unknown as SegTreeConstructor<T>;
 
-  return SegTree;
+    return this.#op(left, right);
+  }
 }
-
-/**
- * 範囲の和を計算するセグ木
- */
-SegTree.sum = SegTree<number>(
-  (a: number, b: number) => a + b,
-  0,
-);
-
-/**
- * 範囲の最小値を計算するセグ木
- */
-SegTree.min = SegTree<number>(
-  Math.min,
-  Infinity,
-);
-
-/**
- * 範囲の最大値を計算するセグ木
- */
-SegTree.max = SegTree<number>(
-  Math.max,
-  -Infinity,
-);
-
-/**
- * 範囲のビット排他的論理和を計算するセグ木
- */
-SegTree.xor = SegTree<number>(
-  (a: number, b: number) => a ^ b,
-  0,
-);
-
-export { SegTree };

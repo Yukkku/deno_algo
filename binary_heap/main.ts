@@ -1,3 +1,5 @@
+"use strict";
+
 const defaultConpare = <T>(a: T, b: T) => {
   if (a > b) {
     return 1;
@@ -9,7 +11,7 @@ const defaultConpare = <T>(a: T, b: T) => {
 }
 
 /**
- * 二分ヒープ。デフォルトではmin-heapになっている
+ * 二分ヒープの実装。デフォルトではmin-heapになっている
  */
 export class BinaryHeap<T> {
   #data: [null, ...T[]] = [null];
