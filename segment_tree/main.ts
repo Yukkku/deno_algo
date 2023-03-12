@@ -1,5 +1,3 @@
-"use strict";
-
 /**
  * Segment Treeの実装
  */

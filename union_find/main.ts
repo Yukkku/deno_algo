@@ -1,5 +1,3 @@
-"use strict";
-
 /**
  * Union Findの実装
  */

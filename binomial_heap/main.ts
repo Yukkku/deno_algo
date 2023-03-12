@@ -1,14 +1,4 @@
-"use strict";
-
-const defaultConpare = <T>(a: T, b: T) => {
-  if (a > b) {
-    return 1;
-  }
-  if (a < b) {
-    return -1;
-  }
-  return 0;
-}
+import { defaultConpare } from '../util.ts';
 
 type BinomialTree<T> = [T, ...BinomialTree<T>[]];
 

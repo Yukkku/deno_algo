@@ -1,20 +1,8 @@
-"use strict";
-
-function assert (_: boolean): asserts _ {}
+import { defaultConpare, assert } from '../util.ts';
 
 /** `[ルート要素, 高さ, 大きさ, 左の子, 右の子]` */
 type NonNullNode<T> = [T, number, number, Node<T>, Node<T>];
 type Node<T> = NonNullNode<T> | null;
-
-const defaultConpare = <T>(a: T, b: T) => {
-  if (a > b) {
-    return 1;
-  }
-  if (a < b) {
-    return -1;
-  }
-  return 0;
-}
 
 const add = <T>(node: NonNullNode<T>, val: T, compare: (a: T, b: T) => number): boolean => {
   const diff = compare(val, node[0]);
