@@ -1,11 +1,11 @@
-import { defaultConpare } from '../util.ts';
+import { defaultConpare, type Heap } from '../util.ts';
 
 type BinomialTree<T> = [T, ...BinomialTree<T>[]];
 
 /**
  * 二項ヒープの実装
  */
-export class BinomialHeap<T> {
+export class BinomialHeap<T> implements Heap<T> {
   #data: []|[...(BinomialTree<T>|undefined)[], BinomialTree<T>] = [];
   #compare: (a: T, b: T) => number;
   #size = 0;
@@ -21,12 +21,7 @@ export class BinomialHeap<T> {
     this.#compare = compareFunc;
   }
 
-  /**
-   * 要素を追加する
-   * @param items 追加する要素
-   * @returns 追加後のヒープの要素数
-   */
-  push (...items: T[]) {
+  insert (...items: T[]) {
     this.#size += items.length;
 
     items.forEach(item => {
@@ -46,13 +41,16 @@ export class BinomialHeap<T> {
 
       this.#data[i] = v;
     });
+
+    return this.#size;
   }
 
-  /**
-   * 最も優先される要素を削除し、その要素を返す。要素がないなら何もせず、`undefined`を返す
-   * @returns 最優先の要素、または`undefined`
-   */
-  pop () {
+  clear () {
+    this.#data = [];
+    this.#size = 0;
+  }
+
+  delete () {
     if (this.#size === 0) {
       return;
     }
@@ -143,11 +141,7 @@ export class BinomialHeap<T> {
     return peaktree[0];
   }
 
-  /**
-   * 最も優先される要素を返す。要素がないなら`undefined`を返す
-   * @returns 最優先の要素、または`undefined`
-   */
-  peak (): T|undefined {
+  find (): T|undefined {
     if (this.#size === 0) {
       return;
     }
