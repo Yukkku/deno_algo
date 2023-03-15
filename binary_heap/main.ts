@@ -1,4 +1,4 @@
-import { defaultConpare, type Heap, type LimitedHeap } from '../util.ts';
+import { defaultConpare, type Heap } from '../util.ts';
 
 /**
  * 二分ヒープの実装。デフォルトではmin-heapになっている
